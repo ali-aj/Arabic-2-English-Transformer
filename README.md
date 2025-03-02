@@ -1,6 +1,6 @@
 # Arabic to English Transformer
 
-This project is a Streamlit application that translates Arabic text to English using a trained transformer model. The application provides an elegant user interface for users to input Arabic text and receive the corresponding English translation.
+This project is a Streamlit application that translates Arabic text to English using a Seq2Seq trained transformer model for Nueral Machine Translation. The application provides an elegant user interface for users to input Arabic text and receive the corresponding English translation.
 
 ## Project Structure
 
@@ -12,7 +12,6 @@ Arabic-2-English-Transformer
 ├── utils
 │   ├── preprocessing.py     # Preprocesses the Arabic text input
 │   └── translation.py       # Contains the translation logic
-├── config.py               # Configuration settings for the application
 ├── assets
 │   └── style.css           # CSS styles for the Streamlit application
 ├── requirements.txt         # Lists the dependencies required for the project
@@ -23,7 +22,7 @@ Arabic-2-English-Transformer
 
 1. **Clone the repository:**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/ali-aj/Arabic-2-English-Transformer.git
    cd Arabic-2-English-Transformer
    ```
 
@@ -47,7 +46,3 @@ Arabic-2-English-Transformer
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a pull request or open an issue for any suggestions or improvements.
-
-## License
-
-This project is licensed under the MIT License. See the LICENSE file for more details.
