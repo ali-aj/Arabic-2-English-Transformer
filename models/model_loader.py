@@ -1,7 +1,6 @@
 import os
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 
-# Then your existing imports
 import streamlit as st
 import torch
 import os
@@ -9,6 +8,7 @@ from tensorflow.keras import layers
 import numpy as np
 import tensorflow as tf
 import tensorflow_datasets as tfds
+import subprocess
 
 # Set hyperparamters for the model
 D_MODEL = 512 # 512
@@ -397,23 +397,32 @@ def translate(model, sentence, tokenizer_in, tokenizer_out, device=None):
     return predicted_sentence
 
 @st.cache_resource
-def load_resources():    
-    # Get the current file's directory (models/)
+def load_resources():
+    # Get the current file's directory
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    
-    tokenizer_inputs_path = os.path.join(current_dir, 'tokenizer_inputs.subword')
-    tokenizer_outputs_path = os.path.join(current_dir, 'tokenizer_outputs.subword')
     model_path = os.path.join(current_dir, 'arabic_to_english_transformer_weights.weights.h5')
 
+    # Ensure Git LFS files are pulled
+    if not os.path.exists(model_path):
+        try:
+            subprocess.run(["git", "lfs", "pull"], check=True)
+        except subprocess.CalledProcessError as e:
+            st.error(f"Error pulling Git LFS files: {e}")
+            return None, None, None, None
+
     # Load tokenizers
-    tokenizer_inputs = tfds.deprecated.text.SubwordTextEncoder.load_from_file(tokenizer_inputs_path)
-    tokenizer_outputs = tfds.deprecated.text.SubwordTextEncoder.load_from_file(tokenizer_outputs_path)
+    tokenizer_inputs = tfds.deprecated.text.SubwordTextEncoder.load_from_file(
+        os.path.join(current_dir, 'tokenizer_inputs.subword')
+    )
+    tokenizer_outputs = tfds.deprecated.text.SubwordTextEncoder.load_from_file(
+        os.path.join(current_dir, 'tokenizer_outputs.subword')
+    )
 
     # Recalculate tokens
     num_words_inputs = tokenizer_inputs.vocab_size + 2
     num_words_output = tokenizer_outputs.vocab_size + 2
 
-    # Recreate the model with the same architecture
+    # Recreate the model
     transformer = Transformer(
         vocab_size_enc=num_words_inputs,
         vocab_size_dec=num_words_output,
@@ -424,15 +433,15 @@ def load_resources():
         dropout_rate=DROPOUT_RATE
     )
 
-    # Create a dummy input to build the model
+    # Dummy input to build the model
     dummy_enc_input = tf.ones((1, MAX_LENGTH), dtype=tf.int32)
     dummy_dec_input = tf.ones((1, MAX_LENGTH), dtype=tf.int32)
     transformer(dummy_enc_input, dummy_dec_input, training=False)
 
-    # Load weights into the model
+    # Load weights
     transformer.load_weights(model_path)
 
-    # Set the device
+    # Set device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     return transformer, tokenizer_inputs, tokenizer_outputs, device

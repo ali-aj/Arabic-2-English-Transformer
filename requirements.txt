@@ -10,3 +10,4 @@ langdetect
 tensorflow>=2.16.1
 tensorflow-datasets>=4.9.2
 protobuf>=3.20.3
+git-lfs
